@@ -20,6 +20,7 @@ topic: spec 守卫 skill 生态
 - R8（事件驱动型）：当进入阶段 ② 前，系统应当删除所有 throwaway prototype 文件，不纳入业务代码。
 - R9（无处不在型）：系统应当将所有实现期偏离记录到 `docs/deviations.md`（单一真相源），SPEC.md 不含偏离记录段落。
 - R10（无处不在型）：系统应当仅从 `SPEC.md` 的 YAML frontmatter `status` 字段解析 SPEC 状态，不解析正文自然语言。
+- R11（事件驱动型）：当 `spec-grilling` 访谈中用户提出一条要求时，系统应当主动提议分类（定为不变式/需求/边界/ADR），给出推荐分类及理由，由用户拍板——分类决策不由 `spec-modeling` 在写入时做。判断标准用精炼三问（恒成立/违反即灾难/可证伪），详见 `SPEC-FORMAT.md` 的"写入前自检"。
 
 ## 边界（Boundaries）
 
@@ -52,6 +53,7 @@ topic: spec 守卫 skill 生态
 - I6：throwaway prototype 必须同时满足三原则（位置 `docs/prototypes/`、标注 `THROWAWAY PROTOTYPE`、阶段 ② 前删除），任一缺失即违反不变式。
 - I7：`spec-clarify` 必须设 `disable-model-invocation: true`；`spec-grilling` 与 `spec-modeling` 不得设此字段。
 - I8：SPEC 状态字段值域固定为 `draft | aligned | implementing | verified | superseded`，不得引入其他值。
+- I9：`spec-modeling` 写入不变式前必须做可证伪性自检——能否写出返回 true/false 的检查函数。不可证伪则提示用户重写表述，但仍写入（不阻断）。`spec-modeling` 不重新做分类决策（分类已由 `spec-grilling` 与用户确定）。
 
 ## 验收标准（Acceptance）
 
@@ -63,3 +65,4 @@ topic: spec 守卫 skill 生态
 - AC6：给定访谈中需要 prototype，当用户同意，那么 prototype 放入 `docs/prototypes/`、顶部标注 THROWAWAY、阶段 ② 前被删除。
 - AC7：给定偏离记录需要归档，当 spec-modeling 写入，那么记录含五字段（类型/根因/后果/处理决定/日期），存于 docs/deviations.md。
 - AC8：给定 agent 需判断 SPEC 所处阶段，当读取 SPEC.md，那么只解析 YAML frontmatter 的 `status` 字段，不解析正文。
+- AC9：给定 spec-grilling 访谈中用户提出要求，当 spec-grilling 提议分类，那么给出推荐分类+理由（用精炼三问判断），由用户拍板后触发 spec-modeling 按分类写入；spec-modeling 写入不变式前做可证伪性自检，不可证伪则提示用户但不阻断。
