@@ -1,0 +1,24 @@
+# 临时工作目录
+.trae/work/
+
+# 临时文档草稿
+.trae/documents/
+
+# 操作系统
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 依赖
+node_modules/
+__pycache__/
+*.pyc
+
+# throwaway prototype（按 SPEC 不应进入版本控制）
+docs/prototypes/
