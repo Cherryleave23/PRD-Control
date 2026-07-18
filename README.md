@@ -41,7 +41,7 @@ PRD-Control 是一套面向 TRAE（及兼容 Claude Code skill 系统）的 SKIL
 |---|---|---|---|
 | ① | 澄清访谈 | spec-grilling | 决策树所有分支解决 + 用户确认共识 |
 | ② | 动态记录 | spec-modeling | SPEC.md 含需求+边界+不变式 + CONTEXT.md 术语齐 + 必要 ADR 已写 |
-| ③ | 实现校验 | spec-modeling | 实现前预检 + 实现中偏离防偏离已启用 |
+| ③ | 实现校验 | spec-modeling | 实现前预检 + 偏离防偏离机制已启用（硬阻断仅限违反不变式，其余不阻断） |
 | ④ | 收尾同步 | spec-modeling | SPEC 状态更新 + 术语/ADR 同步 + 偏离清单归档 |
 
 **两条硬约束**：阶段 ① 出口前不写任何业务实现代码；阶段 ② 文档未齐不进入实现。
@@ -191,7 +191,7 @@ PRD-Control/
             ├── SPEC-FORMAT.md         # SPEC.md 格式模板
             ├── CONTEXT-FORMAT.md      # CONTEXT.md 术语表格式模板
             ├── ADR-FORMAT.md          # ADR 决策记录格式模板
-            └── DEVIATIONS-FORMAT.md   # 偏离记录五字段模板
+            └── DEVIATIONS-FORMAT.md   # 偏离记录六字段模板（含待评估代码位置）
 ```
 
 ## 与 mattpocock/skills 的关系
@@ -201,11 +201,13 @@ PRD-Control/
 | 扩展点 | mattpocock 原版 | PRD-Control |
 |---|---|---|
 | 文档体系 | CONTEXT.md（术语）+ ADR | + SPEC.md 三段式（需求+边界+不变式）+ deviations.md |
-| 偏离处理 | 无 | 硬阻断（违反不变式）+ 软提醒分级（根因×后果诊断）|
+| 偏离处理 | 无 | 硬阻断（违反不变式）+ 强提醒 + 软提醒分级（根因×后果矩阵单一真相源）|
 | 流程控制 | 无显式门禁 | 四阶段门禁（澄清→记录→实现→收尾）|
 | prototype | 独立 skill | 原型隔离三原则（位置+标注+强制删除）|
-| 状态机 | 无 | SPEC frontmatter status，含回退路径 |
-| 不变式分类 | 无 | 精炼三问（恒成立/违反即灾难/可证伪）+ 可证伪性自检 |
+| 状态机 | 无 | SPEC frontmatter status，含回退路径 + 规范偏离代码追踪 |
+| 不变式分类 | 无 | 精炼三问（恒成立/违反即灾难/可证伪）+ 可证伪性自检附伪代码 |
+| 访谈收敛 | 无 | 连续 2 分支无新决策点主动汇总 |
+| 续接兜底 | 无 | 待评估代码位置扫描提醒 |
 
 ## 适用场景
 
@@ -221,11 +223,14 @@ PRD-Control/
 关键决策记录在 `docs/adr/` 与 SPEC.md 不变式段落：
 
 - **硬阻断例外**（ADR-0001）—— 违反不变式自动返工，是"不阻断"原则的唯一例外
+- **矩阵单一真相源** —— 根因×后果矩阵与偏离分级表只在 `DEVIATIONS-FORMAT.md`，其他文件引用不内联（I10）
 - **偏离记录单一真相源** —— 只在 `docs/deviations.md`，SPEC.md 不含偏离记录段落
-- **状态机含回退** —— `implementing → draft` 规范偏离路径
+- **状态机含回退** —— `implementing → draft` 规范偏离路径，含待评估代码位置字段（I11）
 - **frontmatter 字段锁定** —— SPEC.md 三字段固定，agent 只解析 frontmatter
-- **throwaway prototype 三原则** —— 位置+标注+强制删除
-- **不变式分类决策归属** —— `spec-grilling` 做分类（精炼三问），`spec-modeling` 仅做可证伪性自检（不阻断，不改分类）
+- **throwaway prototype 三原则** —— 位置+标注+强制删除，出入口检查清单
+- **不变式分类决策归属** —— `spec-grilling` 做分类（精炼三问），`spec-modeling` 仅做可证伪性自检附伪代码（不阻断，不改分类）
+- **grilling 收敛判定** —— 连续 2 分支无新决策点主动汇总问共识（R12）
+- **续接兜底扫描** —— spec-clarify 续接时扫描 `docs/deviations.md` 待评估代码位置字段
 
 ## License
 

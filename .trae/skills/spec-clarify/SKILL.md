@@ -22,7 +22,7 @@ disable-model-invocation: true
 |---|---|---|---|
 | ① | 澄清访谈 | spec-grilling | 决策树所有分支解决 + 用户确认共识 |
 | ② | 动态记录 | spec-modeling | SPEC.md 含需求+边界+不变式 + CONTEXT.md 术语齐 + 必要 ADR 已写 |
-| ③ | 实现校验 | spec-modeling | 实现前预检完成 + 实现中偏离软提醒已启用（不阻断） |
+| ③ | 实现校验 | spec-modeling | 实现前预检完成 + 偏离防偏离机制已启用（硬阻断仅限违反不变式，其余不阻断） |
 | ④ | 收尾同步 | spec-modeling | SPEC 状态更新 + 术语/ADR 同步 + 偏离清单归档 |
 
 **两条硬约束**：
@@ -39,7 +39,7 @@ disable-model-invocation: true
 
 每次阶段切换前，逐项确认：
 
-- **① → ②**：决策树所有分支是否解决？用户是否明确确认"已达成共识"？
+- **① → ②**：决策树所有分支是否解决？用户是否明确确认"已达成共识"？`docs/prototypes/` 是否已清空？
 - **② → ③**：SPEC.md 是否含需求+边界+不变式三段？CONTEXT.md 术语是否齐？关键决策是否已落 ADR？
 - **③ → ④**：用户是否宣告实现完成？
 - **④ → 结束**：SPEC 状态是否更新？偏离清单是否归档？
@@ -50,6 +50,7 @@ disable-model-invocation: true
 
 - 优先读现有 `SPEC.md`/`CONTEXT.md`/`docs/adr/`，从上次中断的阶段继续。
 - 若现有文档与当前理解冲突，先回到阶段 ① 厘清冲突，而非直接覆盖。
+- **续接时扫描** `docs/deviations.md`：若存在`待评估代码位置`字段非空的条目（规范偏离遗留代码），提醒用户"以下代码待重评估"并提供文件路径清单。
 - 读取 `SPEC.md` 的 **YAML frontmatter `status` 字段**判断所处阶段——**只解析 frontmatter，不解析正文自然语言**（防止正文出现"当前实现中"等措辞被误判为状态）。状态值域固定为：
 
   - `draft` —— ①②中（SPEC 可修改）
