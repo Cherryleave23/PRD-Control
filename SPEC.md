@@ -13,7 +13,7 @@ topic: spec 守卫 skill 生态
 - R1（无处不在型）：系统应当由 3 个 skill 组成，调用方向单向——`spec-clarify` → `spec-grilling` → `spec-modeling`，不允许反向调用。
 - R2（状态驱动型）：当用户键入 `/spec-clarify` 时，系统应当先读项目根的 `SPEC.md`/`CONTEXT.md`/`docs/adr/` 判断新建或续接，再确认主题后调用 `spec-grilling` 启动阶段 ①。
 - R3（事件驱动型）：当 `spec-grilling` 访谈中术语/需求/边界/决策敲定时，系统应当立即触发 `spec-modeling` 写入对应文档，不批量。
-- R4（不期望型）：如果 `spec-modeling` 在实现期检测到违反不变式的偏离，系统应当自动返工，不提示操作者。
+- R4（不期望型）：如果 `spec-modeling` 在实现期检测到违反不变式的偏离，系统应当自动返工（不询问用户），返工完成后立即写入 `docs/deviations.md` 并向用户输出简洁汇总。
 - R5（状态驱动型）：当实现期发现 SPEC 本身有误时，系统应当将 `status` 从 `implementing` 回退到 `draft`，记录"规范偏离"到 `docs/deviations.md`，保留已写代码待重评估，回阶段 ① 只针对冲突条款重访。
 - R6（无处不在型）：系统应当仅由用户显式触发 `/spec-clarify` 启动流程编排；`spec-clarify` 设 `disable-model-invocation: true`，模型不得自动调用它。
 - R7（事件驱动型）：当 `spec-grilling` 访谈中需要 throwaway prototype 厘清具体设计问题时，系统应当在用户同意后构建 prototype，遵守原型隔离三原则。
@@ -56,8 +56,8 @@ topic: spec 守卫 skill 生态
   > 自检：`'偏离记录' in SPEC.md or '偏离' in CONTEXT.md → grep for deviation section → violation if found`
 - I4：SPEC.md 的 frontmatter 字段集固定为 `status` / `last-updated` / `topic` 三字段，不得增减。  
   > 自检：`set(spec.frontmatter.keys()) == {'status', 'last-updated', 'topic'}`
-- I5：违反不变式的偏离触发硬阻断——agent 自动返工，不提示操作者。  
-  > 自检：`deviation.type == '违反不变式' → agent.response_to_user is None and agent.reworks`
+- I5：违反不变式的偏离触发硬阻断——agent 自动返工。**不提示操作者**指不询问"是否返工"（决策已预设），非完全不告知——返工完成后输出简洁汇总（信息同步），并立即写入 `docs/deviations.md`（不等到阶段 ④）。  
+  > 自检：`deviation.type == '违反不变式' → agent.reworks_without_asking AND writes_deviations_immediately AND outputs_summary`
 - I6：throwaway prototype 必须同时满足三原则（位置 `docs/prototypes/`、标注 `THROWAWAY PROTOTYPE`、阶段 ② 前删除），任一缺失即违反不变式。  
   > 自检：`all(p in docs/prototypes/ for p in prototypes) and all('THROWAWAY' in read(p) for p in prototypes) and (phase < 2 or len(prototypes) == 0)`
 - I7：`spec-clarify` 必须设 `disable-model-invocation: true`；`spec-grilling` 与 `spec-modeling` 不得设此字段。  
